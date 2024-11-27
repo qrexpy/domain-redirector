@@ -1,648 +1,860 @@
-<html><head><base href="https://qrexxed.me"/><title>Qrexxed</title><style>
-:root {
-  --matrix-green: #00ff41;
-  --terminal-bg: rgba(0, 0, 0, 0.9);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Courier New', monospace;
-  color: var(--matrix-green);
-  cursor: none !important;
-}
-
-body {
-  background-color: black;
-  overflow: hidden;
-  min-height: 100vh;
-}
-
-.matrix-rain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.terminal-window {
-  position: absolute;
-  background: var(--terminal-bg);
-  border: 2px solid var(--matrix-green);
-  min-width: 400px;
-  min-height: 300px;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-  z-index: 1;
-  transform: translate(-50%, -50%);
-}
-
-.note-window {
-  position: fixed;
-  top: 20%;
-  right: -400px; /* Start off-screen */
-  width: 300px;
-  background: var(--terminal-bg);
-  border: 2px solid var(--matrix-green);
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-  z-index: 2;
-  opacity: 0;
-  transition: all 0.8s ease;
-}
-
-.note-window.active {
-  right: 20px;
-  opacity: 1;
-}
-
-.note-content {
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.countdown {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.title-bar {
-  border-bottom: 1px solid var(--matrix-green);
-  padding-bottom: 5px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.controls {
-  display: flex;
-  gap: 5px;
-}
-
-.control-btn {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1px solid var(--matrix-green);
-}
-
-.content {
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.cursor {
-  position: fixed;
-  width: 12px;
-  height: 12px;
-  border: 1px solid var(--matrix-green);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transition: all 0.1s ease;
-  mix-blend-mode: difference;
-}
-
-.link {
-  color: var(--matrix-green);
-  text-decoration: none;
-  position: relative;
-}
-
-.link:hover {
-  text-shadow: 0 0 10px var(--matrix-green);
-}
-
-.easter-egg {
-  position: fixed;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.konami-active {
-  animation: rainbow 2s linear infinite;
-}
-
-.name-input {
-  background: transparent;
-  border: none;
-  outline: none;
-  width: 200px;
-  margin-left: 10px;
-}
-
-.name-input:focus {
-  border-bottom: 1px solid var(--matrix-green);
-}
-
-@keyframes rainbow {
-  0% { color: red; }
-  20% { color: yellow; }
-  40% { color: lime; }
-  60% { color: cyan; }
-  80% { color: magenta; }
-  100% { color: red; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes typewriter {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-.fade-effect {
-  animation: fadeIn 2s ease forwards;
-}
-
-.typewriter-effect {
-  display: inline-block;
-  overflow: hidden;
-  white-space: nowrap;
-  animation: typewriter 2s steps(40, end) forwards;
-}
-
-.login-status {
-  position: fixed;
-  top: 20px;
-  right: -400px; /* Start off-screen */
-  background: var(--terminal-bg);
-  border: 2px solid var(--matrix-green);
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-  z-index: 2;
-  opacity: 0;
-  transition: all 0.8s ease;
-  text-align: center; /* Center the text */
-}
-
-.login-status.active {
-  right: 20px;
-  opacity: 1;
-}
-
-.login-status.fade-out {
-  right: -400px;
-  opacity: 0;
-}
-
-.login-status .title-bar {
-  text-align: center; /* Center the text */
-  justify-content: center; /* Center the content horizontally */
-}
-
-.login-status .title-bar span {
-  flex: 1;
-  text-align: center;
-}
-
-.mute-button {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  width: 50px;
-  height: 50px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  border: 1px solid var(--matrix-green);
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  cursor: pointer !important;
-  transition: all 0.3s ease;
-}
-
-.mute-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
-}
-
-.mute-button svg {
-  width: 24px;
-  height: 24px;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.mute-button:not(.muted) svg {
-  transform: scale(1);
-  transition: transform 0.5s ease;
-}
-
-.mute-button svg path {
-  fill: var(--matrix-green); /* Set SVG fill to Matrix green color */
-}
-
-.mute-button.muted svg path {
-  fill: var(--matrix-green); /* Ensure the muted state also uses Matrix green */
-}
-
-.mute-button:not(.muted) svg path {
-  fill: var(--matrix-green); /* Ensure the unmuted state also uses Matrix green */
-}
-</style></head><body>
-<div class="cursor"></div>
-<audio id="background-music" loop>
-  <source src="audio/dj quads - its near.mp3" type="audio/mp3">
-</audio>
-<canvas class="matrix-rain"></canvas>
-
-<div class="terminal-window" style="top: 50%; left: 50%;">
-  <div class="title-bar">
-    <span>Matrix Terminal</span>
-    <div class="controls">
-      <div class="control-btn"></div>
-      <div class="control-btn"></div>
-      <div class="control-btn"></div>
-    </div>
-  </div>
-  <div class="content">
-    <div id="intro-sequence"></div>
-    <div id="post-intro"></div>
-    <div id="main-content" style="display: none;">
-      <br>
-      <p>Available endpoints:</p>
-      <p>> <a href="https://ubuntu-profile.qrexxed.me" class="link" target="_blank">Ubuntu Profile Interface</a></p>
-      <p>> <a href="https://discord-bio.qrexxed.me" class="link" target="_blank">Discord Bio</a></p>
-      <br>
-      <p class="typing"></p>
-    </div>
-  </div>
-</div>
-
-<div class="note-window">
-  <div class="title-bar">
-    <span>Note</span>
-    <div class="controls">
-      <div class="control-btn"></div>
-      <div class="control-btn"></div>
-      <div class="control-btn"></div>
-    </div>
-  </div>
-  <div class="note-content">
-    <div id="note-text"></div>
-    <div id="countdown" class="countdown"></div>
-  </div>
-</div>
-
-<div class="login-status">
-  <div class="title-bar">
-    <span>Login Status</span>
-  </div>
-  <div class="login-content">
-    <div id="login-text"></div>
-    <div id="secret-key"></div>
-  </div>
-</div>
-
-<div class="mute-button">
-  <!-- Speaker icon -->
-  <svg class="speaker-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-  </svg>
-  <!-- X icon (initially hidden) -->
-  <svg class="x-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display: none;">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-  </svg>
-</div>
-
-<script>
-const canvas = document.querySelector('.matrix-rain');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
-const fontSize = 14;
-const columns = canvas.width/fontSize;
-const drops = [];
-
-for(let x = 0; x < columns; x++) {
-    drops[x] = 1;
-}
-
-function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#00ff41';
-    ctx.font = fontSize + 'px monospace';
-    
-    for(let i = 0; i < drops.length; i++) {
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-        
-        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975)
-            drops[i] = 0;
-        
-        drops[i]++;
-    }
-}
-
-setInterval(draw, 33);
-
-const backgroundMusic = document.getElementById('background-music');
-backgroundMusic.volume = 0.5; // Set volume to 50%
-
-const muteButton = document.querySelector('.mute-button');
-let isMuted = false;
-
-muteButton.addEventListener('click', () => {
-  isMuted = !isMuted;
-  backgroundMusic.volume = isMuted ? 0 : 0.5;
-  
-  const speakerIcon = muteButton.querySelector('.speaker-icon');
-  const xIcon = muteButton.querySelector('.x-icon');
-  
-  if (isMuted) {
-    speakerIcon.style.display = 'none';
-    xIcon.style.display = 'block';
-  } else {
-    speakerIcon.style.display = 'block';
-    xIcon.style.display = 'none';
+<html><head><base href="https://qrexxed.me" /><title>qrexxed</title><style>
+  :root {
+    --matrix-green: #00ff41;
+    --terminal-bg: rgba(0, 0, 0, 0.9);
   }
-});
-
-// Update the playBackgroundMusic function to respect mute state
-function playBackgroundMusic() {
-  backgroundMusic.volume = isMuted ? 0 : 0.5;
-  backgroundMusic.play().catch(error => {
-    console.log("Autoplay prevented:", error);
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', monospace;
+    color: var(--matrix-green);
+    cursor: none !important; 
+  }
+  
+  body {
+    background-color: black;
+    overflow: hidden;
+    min-height: 100vh;
+    cursor: none !important;
+  }
+  
+  .matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .terminal-window {
+    position: absolute;
+    background: var(--terminal-bg);
+    border: 2px solid var(--matrix-green);
+    min-width: 400px;
+    min-height: 300px;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    z-index: 1;
+    transform: translate(calc(-50% + 250px), -50%); /* Add 250px to x-offset to move right */
+    top: 50%;
+    left: 50%;
+  }
+  
+  .note-window {
+    position: fixed;
+    top: 20%;
+    right: -400px; /* Start off-screen */
+    width: 300px;
+    background: var(--terminal-bg);
+    border: 2px solid var(--matrix-green);
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    z-index: 2;
+    opacity: 0;
+    transition: all 0.8s ease;
+  }
+  
+  .note-window.active {
+    right: 20px;
+    opacity: 1;
+  }
+  
+  .note-content {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .countdown {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .title-bar {
+    border-bottom: 1px solid var(--matrix-green);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .terminal-time {
+    font-size: 14px;
+    color: var(--matrix-green);
+  }
+  
+  .controls {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .control-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid var(--matrix-green);
+  }
+  
+  .content {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .cursor {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--matrix-green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: all 0.1s ease;
+    mix-blend-mode: difference;
+    will-change: transform; /* Add this for better performance */
+  }
+  
+  .link {
+    color: var(--matrix-green);
+    text-decoration: none;
+    position: relative;
+  }
+  
+  .link:hover {
+    text-shadow: 0 0 10px var(--matrix-green);
+  }
+  
+  .easter-egg {
+    position: fixed;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .konami-active {
+    animation: rainbow 2s linear infinite;
+  }
+  
+  .name-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 200px;
+    margin-left: 10px;
+  }
+  
+  .name-input:focus {
+    border-bottom: 1px solid var(--matrix-green);
+  }
+  
+  @keyframes rainbow {
+    0% { color: red; }
+    20% { color: yellow; }
+    40% { color: lime; }
+    60% { color: cyan; }
+    80% { color: magenta; }
+    100% { color: red; }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  
+  .fade-effect {
+    animation: fadeIn 2s ease forwards;
+  }
+  
+  .typewriter-effect {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typewriter 2s steps(40, end) forwards;
+  }
+  
+  .login-status {
+    position: fixed;
+    top: 20px;
+    right: -400px; /* Start off-screen */
+    background: var(--terminal-bg);
+    border: 2px solid var(--matrix-green);
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    z-index: 2;
+    opacity: 0;
+    transition: all 0.8s ease;
+    text-align: center; /* Center the text */
+  }
+  
+  .login-status.active {
+    right: 20px;
+    opacity: 1;
+  }
+  
+  .login-status.fade-out {
+    right: -400px;
+    opacity: 0;
+  }
+  
+  .login-status .title-bar {
+    text-align: center; /* Center the text */
+    justify-content: center; /* Center the content horizontally */
+  }
+  
+  .login-status .title-bar span {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .music-player {
+    position: fixed;
+    left: -400px; /* Start off-screen */
+    bottom: 50px;
+    width: 500px; /* Increased from 350px */
+    min-height: 300px; /* Added min-height */
+    background: var(--terminal-bg);
+    border: 2px solid var(--matrix-green);
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    z-index: 1000;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+  }
+  
+  .music-player.active {
+    left: 20px;
+    opacity: 1;
+  }
+  
+  .player-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+  }
+  
+  .playlist {
+    margin: 10px 0;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  .playlist-item {
+    padding: 5px;
+    margin: 2px 0;
+    cursor: none !important;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .playlist-item:hover {
+    border-color: var(--matrix-green);
+    background: rgba(0, 255, 65, 0.1);
+  }
+  
+  .playlist-item.active {
+    background: rgba(0, 255, 65, 0.2);
+  }
+  
+  .player-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 15px 0;
+  }
+  
+  .control-button {
+    background: transparent;
+    border: 1px solid var(--matrix-green);
+    color: var(--matrix-green);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  .control-button:hover {
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+  }
+  
+  .visualizer {
+    height: 50px; /* Reduce from 100px to 50px */
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  
+  .visualizer-bar {
+    flex: 1;
+    background: var(--matrix-green);
+    transition: height 0.1s ease;
+    max-height: 40px; /* Add this line to limit height */
+  }
+  </style></head><body>
+  <div class="cursor"></div>
+  <canvas class="matrix-rain"></canvas>
+  
+  <div class="terminal-window" style="top: 50%; left: 50%;">
+    <div class="title-bar">
+      <span>Matrix Terminal</span>
+      <span class="terminal-time" id="terminal-time"></span>
+      <div class="controls">
+        <div class="control-btn"></div>
+        <div class="control-btn"></div>
+        <div class="control-btn"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div id="intro-sequence"></div>
+      <div id="post-intro"></div>
+      <div id="main-content" style="display: none;">
+        <br>
+        <p>Available endpoints:</p>
+        <p>> <a href="https://ubuntu-profile.qrexxed.me" class="link" target="_blank">Ubuntu Profile Interface</a></p>
+        <p>> <a href="https://discord-bio.qrexxed.me" class="link" target="_blank">Discord Bio</a></p>
+        <br>
+        <p class="typing"></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="note-window">
+    <div class="title-bar">
+      <span>Note</span>
+      <div class="controls">
+        <div class="control-btn"></div>
+        <div class="control-btn"></div>
+        <div class="control-btn"></div>
+      </div>
+    </div>
+    <div class="note-content">
+      <div id="note-text"></div>
+      <div id="countdown" class="countdown"></div>
+    </div>
+  </div>
+  
+  <div class="login-status">
+    <div class="title-bar">
+      <span>Login Status</span>
+    </div>
+    <div class="login-content">
+      <div id="login-text"></div>
+      <div id="secret-key"></div>
+    </div>
+  </div>
+  
+  <div class="music-player">
+    <div class="player-title-bar">
+      <span>Matrix Music Player</span>
+      <div class="controls">
+        <div class="control-btn"></div>
+        <div class="control-btn"></div>
+        <div class="control-btn"></div>
+      </div>
+    </div>
+    <div class="playlist">
+      <div class="playlist-item active" data-src="audio/dj quads - its near.mp3">DJ Quads - It's Near</div>
+      <div class="playlist-item" data-src="audio/Matrix Soundtrack - Sol's RNG.mp3">Matrix Soundtrack - Sol's RNG</div>
+      <div class="playlist-item" data-src="audio/Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3">Vani - The Blood Cleric</div>
+    </div>
+    <div class="player-controls">
+      <button class="control-button prev-btn">⏮</button>
+      <button class="control-button play-btn">▶</button>
+      <button class="control-button next-btn">⏭</button>
+    </div>
+    <div class="visualizer">
+      <!-- Bars will be added dynamically -->
+    </div>
+  </div>
+  
+  <script>
+  const canvas = document.querySelector('.matrix-rain');
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+  const fontSize = 14;
+  const columns = canvas.width/fontSize;
+  const drops = [];
+  
+  for(let x = 0; x < columns; x++) {
+      drops[x] = 1;
+  }
+  
+  function draw() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#00ff41';
+      ctx.font = fontSize + 'px monospace';
+      
+      for(let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+          
+          if(drops[i]*fontSize > canvas.height && Math.random() > 0.975)
+              drops[i] = 0;
+          
+          drops[i]++;
+      }
+  }
+  
+  setInterval(draw, 33);
+  
+  class MusicPlayer {
+      constructor() {
+          this.player = document.querySelector('.music-player');
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.analyser = this.audioContext.createAnalyser();
+          this.audio = new Audio();
+          this.audio.crossOrigin = "anonymous";
+          
+          this.source = this.audioContext.createMediaElementSource(this.audio);
+          this.source.connect(this.analyser);
+          this.analyser.connect(this.audioContext.destination);
+          
+          this.analyser.fftSize = 128;
+          this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+          
+          this.playlist = document.querySelectorAll('.playlist-item');
+          this.playBtn = document.querySelector('.play-btn');
+          this.prevBtn = document.querySelector('.prev-btn');
+          this.nextBtn = document.querySelector('.next-btn');
+          this.visualizer = document.querySelector('.visualizer');
+          
+          this.currentTrack = 0;
+          this.isPlaying = false;
+          
+          this.setupVisualizer();
+          this.setupEventListeners();
+          
+          // Show player after login sequence
+          setTimeout(() => {
+              this.player.classList.add('active');
+          }, 5000); // Adjust timing as needed
+      }
+      
+      setupVisualizer() {
+          // Create visualizer bars
+          for (let i = 0; i < 32; i++) {
+              const bar = document.createElement('div');
+              bar.className = 'visualizer-bar';
+              bar.style.height = '2px';
+              this.visualizer.appendChild(bar);
+          }
+      }
+      
+      setupEventListeners() {
+          this.playBtn.addEventListener('click', () => this.togglePlay());
+          this.prevBtn.addEventListener('click', () => this.playPrev());
+          this.nextBtn.addEventListener('click', () => this.playNext());
+          
+          this.playlist.forEach((item, index) => {
+              item.addEventListener('click', () => {
+                  this.currentTrack = index;
+                  this.loadAndPlay();
+              });
+          });
+          
+          this.audio.addEventListener('ended', () => this.playNext());
+      }
+      
+      togglePlay() {
+          if (this.audioContext.state === 'suspended') {
+              this.audioContext.resume();
+          }
+          
+          if (!this.isPlaying) {
+              this.loadAndPlay();
+          } else {
+              this.audio.pause();
+              this.isPlaying = false;
+              this.playBtn.textContent = '▶';
+          }
+      }
+      
+      loadAndPlay() {
+          const track = this.playlist[this.currentTrack];
+          this.audio.src = track.dataset.src;
+          
+          // Handle the play promise properly
+          this.audio.play()
+              .then(() => {
+                  this.isPlaying = true;
+                  this.playBtn.textContent = '⏸';
+                  
+                  // Update active track
+                  this.playlist.forEach(item => item.classList.remove('active'));
+                  track.classList.add('active');
+              })
+              .catch(error => {
+                  console.log("Playback failed:", error);
+                  this.isPlaying = false;
+                  this.playBtn.textContent = '▶';
+              });
+      }
+      
+      playNext() {
+          this.currentTrack = (this.currentTrack + 1) % this.playlist.length;
+          this.loadAndPlay();
+      }
+      
+      playPrev() {
+          this.currentTrack = (this.currentTrack - 1 + this.playlist.length) % this.playlist.length;
+          this.loadAndPlay();
+      }
+      
+      updateVisualizer() {
+          this.analyser.getByteFrequencyData(this.dataArray);
+          const bars = this.visualizer.children;
+          
+          for (let i = 0; i < bars.length; i++) {
+              const height = (this.dataArray[i] * 0.3); // Reduce from 0.7 to 0.3
+              bars[i].style.height = `${height}px`;
+          }
+          
+          requestAnimationFrame(() => this.updateVisualizer());
+      }
+  }
+  
+  // Add a clock update function
+  function updateClock() {
+      const timeElement = document.getElementById('terminal-time');
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+      timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+  }
+  
+  // Update the clock every second
+  setInterval(updateClock, 1000);
+  updateClock(); // Initial update
+  
+  // Modify the initialization to remove volume control
+  document.addEventListener('DOMContentLoaded', () => {
+      const player = new MusicPlayer();  
+      player.updateVisualizer();
+      
+      // Wait for first user interaction before enabling audio
+      document.addEventListener('click', () => {
+          if (player.audioContext.state === 'suspended') {
+              player.audioContext.resume();
+          }
+      }, { once: true });
   });
-}
-
-// Function to start playing music
-function playBackgroundMusicAuto() {
-  playBackgroundMusic();
-}
-
-// Try to play music on page load
-playBackgroundMusicAuto();
-
-// Add click listener to ensure music plays after user interaction
-document.addEventListener('click', () => {
-  if (backgroundMusic.paused) {
-    playBackgroundMusic();
+  
+  // Initialize draggable windows - only for terminal
+  document.addEventListener('DOMContentLoaded', () => {
+      initDraggable(terminal);
+  });
+  
+  async function typeText(text, element, speed = 50) {
+      for (let char of text) {
+          element.textContent += char;
+          await new Promise(resolve => setTimeout(resolve, speed));
+      }
+      return new Promise(resolve => setTimeout(resolve, 500));
   }
-}, { once: true });
-
-// Handle visibility change
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    backgroundMusic.pause();
-  } else {
-    playBackgroundMusic();
+  
+  async function deleteText(element, speed = 30) {
+      while (element.textContent.length > 0) {
+          element.textContent = element.textContent.slice(0, -1);
+          await new Promise(resolve => setTimeout(resolve, speed));
+      }
+      return new Promise(resolve => setTimeout(resolve, 200));
   }
-});
-
-async function typeText(text, element, speed = 50) {
-    for (let char of text) {
-        element.textContent += char;
-        await new Promise(resolve => setTimeout(resolve, speed));
-    }
-    return new Promise(resolve => setTimeout(resolve, 500));
-}
-
-async function deleteText(element, speed = 30) {
-    while (element.textContent.length > 0) {
-        element.textContent = element.textContent.slice(0, -1);
-        await new Promise(resolve => setTimeout(resolve, speed));
-    }
-    return new Promise(resolve => setTimeout(resolve, 200));
-}
-
-async function startIntroSequence() {
-    const introDiv = document.getElementById('intro-sequence');
-    const mainContent = document.getElementById('main-content');
-    const postIntro = document.getElementById('post-intro');
+  
+  async function startIntroSequence() {
+      const introDiv = document.getElementById('intro-sequence');
+      const mainContent = document.getElementById('main-content');
+      const postIntro = document.getElementById('post-intro');
+      
+      await typeText('Welcome to the Matrix, user...', introDiv);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      introDiv.innerHTML += '<br>Name? <input type="text" class="name-input" id="name-input">';
+      const nameInput = document.getElementById('name-input');
+      nameInput.focus();
+      
+      nameInput.addEventListener('keypress', async (e) => {
+          if (e.key === 'Enter') {
+              const name = nameInput.value.trim();
+              introDiv.innerHTML = '';
+              
+              // Show login status
+              const loginStatus = document.querySelector('.login-status');
+              const loginText = document.getElementById('login-text');
+              const secretKey = document.getElementById('secret-key');
+              
+              setTimeout(async () => {
+                  loginStatus.classList.add('active');
+                  
+                  if (name === '') {
+                      // Type and then delete "You have learnt self-privacy..."
+                      await typeText('You have learnt self-privacy...', introDiv);
+                      await new Promise(resolve => setTimeout(resolve, 1000));
+                      await deleteText(introDiv);
+                      
+                      // Show anonymous login status
+                      await typeText('Logged in as anonymous', loginText, 30);
+                      await typeText('\nSecret key: none', secretKey, 30);
+                  } else {
+                      await typeText(`Welcome, ${name}`, introDiv);
+                      
+                      // Generate random 16-digit key
+                      const randomKey = Array.from({length: 16}, () => 
+                          Math.floor(Math.random() * 16).toString(16)).join('').toUpperCase();
+                      
+                      // Show user login status
+                      await typeText(`Logged in as ${name}`, loginText, 30);
+                      await typeText(`\nSecret key: ${randomKey}`, secretKey, 30);
+                  }
+  
+                  // Add fade out after 2 seconds
+                  setTimeout(() => {
+                      loginStatus.classList.add('fade-out');
+                      setTimeout(() => {
+                          loginStatus.remove();
+                      }, 800); // Match transition duration
+                  }, 2000);
+  
+              }, 500);
+              
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
+              // Continue with the rest of the sequence...
+              await typeText('Accessing mainframe...', postIntro, 20);
+              await new Promise(resolve => setTimeout(resolve, 800));
+              await deleteText(postIntro);
+              await typeText('Connection established to: qrexxed.me', postIntro, 20);
+              await new Promise(resolve => setTimeout(resolve, 800));
+              await deleteText(postIntro);
+              mainContent.style.display = 'block';
+  
+              // Show first-time visit note if needed
+              if (!localStorage.getItem('hasVisited')) {
+                  // Set the flag for future visits
+                  localStorage.setItem('hasVisited', 'true');
+  
+                  // Add note window animation and content
+                  const noteWindow = document.querySelector('.note-window');
+                  const noteText = document.getElementById('note-text');
+                  const countdown = document.getElementById('countdown');
+  
+                  // Show note window after a small delay
+                  setTimeout(async () => {
+                      noteWindow.classList.add('active');
+                      
+                      // Type the note message
+                      await typeText('This is not one of my projects but an endpoint to all of my subdomains containing my projects.', noteText, 30);
+                      
+                      // Wait a moment before starting countdown
+                      await new Promise(resolve => setTimeout(resolve, 1000));
+                      
+                      // Add countdown message
+                      await typeText('Self-destructing in 5..', countdown, 50);
+                      
+                      // Start countdown
+                      let count = 5;
+                      const timer = setInterval(() => {
+                          count--;
+                          countdown.textContent = `Self-destructing in ${count}..`;
+                          
+                          if (count <= 0) {
+                              clearInterval(timer);
+                              noteWindow.style.transition = 'all 0.5s ease';
+                              noteWindow.style.opacity = '0';
+                              noteWindow.style.transform = 'translateY(-100px)';
+                              setTimeout(() => {
+                                  noteWindow.remove();
+                              }, 500);
+                          }
+                      }, 1000);
+                  }, 1000);
+              }
+          }
+      });
+  }
+  
+  startIntroSequence();
+  
+  const cursor = document.querySelector('.cursor');
+  
+  document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+  });
+  
+  const typing = document.querySelector('.typing');
+  const texts = [
+      'Searching for truth...',
+      'Reality is not what it seems...',
+      'Enter the Matrix...'
+  ];
+  
+  let textIndex = 0;
+  let charIndex = 0;
+  
+  function type() {
+      if (charIndex < texts[textIndex].length) {
+          typing.textContent += texts[textIndex].charAt(charIndex);
+          charIndex++;
+          setTimeout(type, 100);
+      } else {
+          setTimeout(erase, 2000);
+      }
+  }
+  
+  function erase() {
+      if (charIndex > 0) {
+          typing.textContent = texts[textIndex].substring(0, charIndex-1);
+          charIndex--;
+          setTimeout(erase, 50);
+      } else {
+          textIndex = (textIndex + 1) % texts.length;
+          setTimeout(type, 500);
+      }
+  }
+  
+  setTimeout(type, 1000);
+  
+  const terminal = document.querySelector('.terminal-window');
+  let isDragging = false;
+  let currentX;
+  let currentY;
+  let initialX;
+  let initialY;
+  let xOffset = 0;
+  let yOffset = 0;
+  
+  terminal.addEventListener('mousedown', dragStart);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', dragEnd);
+  
+  function dragStart(e) {
+      const style = window.getComputedStyle(terminal);
+      const matrix = new WebKitCSSMatrix(style.transform);
+      
+      xOffset = matrix.m41;
+      yOffset = matrix.m42;
+      
+      initialX = e.clientX - xOffset;
+      initialY = e.clientY - yOffset;
+  
+      if (e.target === terminal || e.target.parentNode === terminal) {
+          isDragging = true;
+          cursor.classList.add('dragging'); // Add dragging class
+      }
+  }
+  
+  function drag(e) {
+      if (isDragging) {
+          e.preventDefault();
+          currentX = e.clientX - initialX;
+          currentY = e.clientY - initialY;
+  
+          xOffset = currentX;
+          yOffset = currentY;
+  
+          setTranslate(currentX, currentY, terminal);
+      }
+  }
+  
+  function setTranslate(xPos, yPos, el) {
+      el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+  }
+  
+  function dragEnd(e) {
+      initialX = currentX;
+      initialY = currentY;
+      isDragging = false;
+      cursor.classList.remove('dragging'); // Remove dragging class
+  }
+  
+  const musicPlayer = document.querySelector('.music-player');
+  let musicPlayerDragging = false;
+  let mpCurrentX;
+  let mpCurrentY;
+  let mpInitialX;
+  let mpInitialY;
+  let mpXOffset = 0;
+  let mpYOffset = 0;
+  
+  function initDraggable(element) {
+    const titleBar = element.querySelector('.player-title-bar, .title-bar');
     
-    await typeText('Welcome to the Matrix, user...', introDiv);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    introDiv.innerHTML += '<br>Name? <input type="text" class="name-input" id="name-input">';
-    const nameInput = document.getElementById('name-input');
-    nameInput.focus();
-    
-    nameInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            const name = nameInput.value.trim();
-            introDiv.innerHTML = '';
-            
-            // Show login status
-            const loginStatus = document.querySelector('.login-status');
-            const loginText = document.getElementById('login-text');
-            const secretKey = document.getElementById('secret-key');
-            
-            setTimeout(async () => {
-                loginStatus.classList.add('active');
-                
-                if (name === '') {
-                    // Type and then delete "You have learnt self-privacy..."
-                    await typeText('You have learnt self-privacy...', introDiv);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    await deleteText(introDiv);
-                    
-                    // Show anonymous login status
-                    await typeText('Logged in as anonymous', loginText, 30);
-                    await typeText('\nSecret key: none', secretKey, 30);
-                } else {
-                    await typeText(`Welcome, ${name}`, introDiv);
-                    
-                    // Generate random 16-digit key
-                    const randomKey = Array.from({length: 16}, () => 
-                        Math.floor(Math.random() * 16).toString(16)).join('').toUpperCase();
-                    
-                    // Show user login status
-                    await typeText(`Logged in as ${name}`, loginText, 30);
-                    await typeText(`\nSecret key: ${randomKey}`, secretKey, 30);
-                }
-
-                // Add fade out after 2 seconds
-                setTimeout(() => {
-                    loginStatus.classList.add('fade-out');
-                    setTimeout(() => {
-                        loginStatus.remove();
-                    }, 800); // Match transition duration
-                }, 2000);
-
-            }, 500);
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Continue with the rest of the sequence...
-            await typeText('Accessing mainframe...', postIntro, 20);
-            await new Promise(resolve => setTimeout(resolve, 800));
-            await deleteText(postIntro);
-            await typeText('Connection established to: qrexxed.me', postIntro, 20);
-            await new Promise(resolve => setTimeout(resolve, 800));
-            await deleteText(postIntro);
-            mainContent.style.display = 'block';
-
-            // Show first-time visit note if needed
-            if (!localStorage.getItem('hasVisited')) {
-                // Set the flag for future visits
-                localStorage.setItem('hasVisited', 'true');
-
-                // Add note window animation and content
-                const noteWindow = document.querySelector('.note-window');
-                const noteText = document.getElementById('note-text');
-                const countdown = document.getElementById('countdown');
-
-                // Show note window after a small delay
-                setTimeout(async () => {
-                    noteWindow.classList.add('active');
-                    
-                    // Type the note message
-                    await typeText('This is not one of my projects but an endpoint to all of my subdomains containing my projects.', noteText, 30);
-                    
-                    // Wait a moment before starting countdown
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    // Add countdown message
-                    await typeText('Self-destructing in 5..', countdown, 50);
-                    
-                    // Start countdown
-                    let count = 5;
-                    const timer = setInterval(() => {
-                        count--;
-                        countdown.textContent = `Self-destructing in ${count}..`;
-                        
-                        if (count <= 0) {
-                            clearInterval(timer);
-                            noteWindow.style.transition = 'all 0.5s ease';
-                            noteWindow.style.opacity = '0';
-                            noteWindow.style.transform = 'translateY(-100px)';
-                            setTimeout(() => {
-                                noteWindow.remove();
-                            }, 500);
-                        }
-                    }, 1000);
-                }, 1000);
-            }
-        }
-    });
-}
-
-startIntroSequence();
-
-const cursor = document.querySelector('.cursor');
-
-document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-});
-
-const typing = document.querySelector('.typing');
-const texts = [
-    'Searching for truth...',
-    'Reality is not what it seems...',
-    'Enter the Matrix...'
-];
-
-let textIndex = 0;
-let charIndex = 0;
-
-function type() {
-    if (charIndex < texts[textIndex].length) {
-        typing.textContent += texts[textIndex].charAt(charIndex);
-        charIndex++;
-        setTimeout(type, 100);
-    } else {
-        setTimeout(erase, 2000);
-    }
-}
-
-function erase() {
-    if (charIndex > 0) {
-        typing.textContent = texts[textIndex].substring(0, charIndex-1);
-        charIndex--;
-        setTimeout(erase, 50);
-    } else {
-        textIndex = (textIndex + 1) % texts.length;
-        setTimeout(type, 500);
-    }
-}
-
-setTimeout(type, 1000);
-
-const terminal = document.querySelector('.terminal-window');
-let isDragging = false;
-let currentX;
-let currentY;
-let initialX;
-let initialY;
-let xOffset = 0;
-let yOffset = 0;
-
-terminal.addEventListener('mousedown', dragStart);
-document.addEventListener('mousemove', drag);
-document.addEventListener('mouseup', dragEnd);
-
-function dragStart(e) {
-    const style = window.getComputedStyle(terminal);
-    const matrix = new WebKitCSSMatrix(style.transform);
-    
-    xOffset = matrix.m41;
-    yOffset = matrix.m42;
-    
-    initialX = e.clientX - xOffset;
-    initialY = e.clientY - yOffset;
-
-    if (e.target === terminal || e.target.parentNode === terminal) {
-        isDragging = true;
-    }
-}
-
-function drag(e) {
-    if (isDragging) {
+    titleBar.addEventListener('mousedown', (e) => {
+      const style = window.getComputedStyle(element);
+      const matrix = new WebKitCSSMatrix(style.transform);
+      
+      const xOffset = matrix.m41;
+      const yOffset = matrix.m42;
+      
+      const initialX = e.clientX - xOffset;
+      const initialY = e.clientY - yOffset;
+      
+      function dragMove(e) {
         e.preventDefault();
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
-
-        xOffset = currentX;
-        yOffset = currentY;
-
-        setTranslate(currentX, currentY, terminal);
-    }
-}
-
-function setTranslate(xPos, yPos, el) {
-    el.style.transform = `translate(${xPos}px, ${yPos}px)`;
-}
-
-function dragEnd(e) {
-    initialX = currentX;
-    initialY = currentY;
-    isDragging = false;
-}
-
-let keys = [];
-const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-
-document.addEventListener('keydown', (e) => {
-    keys.push(e.key);
-    keys = keys.slice(-10);
-    
-    if (JSON.stringify(keys) === JSON.stringify(konamiCode)) {
-        document.body.classList.add('konami-active');
-        setTimeout(() => {
-            document.body.classList.remove('konami-active');
-        }, 5000);
-    }
-});
-
-</script>
-</body></html>
+        const currentX = e.clientX - initialX;
+        const currentY = e.clientY - initialY;
+        
+        element.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        
+        // Update cursor position without transition
+        cursor.style.transition = 'none';
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      }
+      
+      function dragEnd() {
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+        cursor.style.transition = 'all 0.1s ease'; // Restore cursor transition
+      }
+      
+      document.addEventListener('mousemove', dragMove);
+      document.addEventListener('mouseup', dragEnd);
+    });
+  }
+  
+  // Initialize draggable windows
+  document.addEventListener('DOMContentLoaded', () => {
+    initDraggable(terminal);
+  });
+  
+  let keys = [];
+  const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  
+  document.addEventListener('keydown', (e) => {
+      keys.push(e.key);
+      keys = keys.slice(-10);
+      
+      if (JSON.stringify(keys) === JSON.stringify(konamiCode)) {
+          document.body.classList.add('konami-active');
+          setTimeout(() => {
+              document.body.classList.remove('konami-active');
+          }, 5000);
+      }
+  });
+  </script>
+  </body></html>
