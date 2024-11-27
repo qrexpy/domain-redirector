@@ -1,4 +1,4 @@
-<html><head><base href="https://qrexxed.me"/><title>qrexxed</title><style>
+<html><head><meta charset="UTF-8"><base href="https://example.com" /><style>
   :root {
     --matrix-green: #00ff41;
     --terminal-bg: rgba(0, 0, 0, 0.9);
@@ -40,7 +40,7 @@
     border-radius: 5px;
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
     z-index: 1;
-    transform: translate(calc(-50% + 250px), -50%); /* Add 250px to x-offset to move right */
+    transform: translate(calc(-50% + 250px), -50%);
     top: 50%;
     left: 50%;
   }
@@ -48,7 +48,7 @@
   .note-window {
     position: fixed;
     top: 20%;
-    right: -400px; /* Start off-screen */
+    right: -400px;
     width: 300px;
     background: var(--terminal-bg);
     border: 2px solid var(--matrix-green);
@@ -116,7 +116,7 @@
     z-index: 9999;
     transition: all 0.1s ease;
     mix-blend-mode: difference;
-    will-change: transform; /* Add this for better performance */
+    will-change: transform;
   }
   
   .link {
@@ -184,7 +184,7 @@
   .login-status {
     position: fixed;
     top: 20px;
-    right: -400px; /* Start off-screen */
+    right: -400px;
     background: var(--terminal-bg);
     border: 2px solid var(--matrix-green);
     padding: 15px;
@@ -193,7 +193,7 @@
     z-index: 2;
     opacity: 0;
     transition: all 0.8s ease;
-    text-align: center; /* Center the text */
+    text-align: center;
   }
   
   .login-status.active {
@@ -207,8 +207,8 @@
   }
   
   .login-status .title-bar {
-    text-align: center; /* Center the text */
-    justify-content: center; /* Center the content horizontally */
+    text-align: center;
+    justify-content: center;
   }
   
   .login-status .title-bar span {
@@ -218,10 +218,10 @@
   
   .music-player {
     position: fixed;
-    left: -400px; /* Start off-screen */
+    left: -400px;
     bottom: 50px;
-    width: 500px; /* Increased from 350px */
-    min-height: 300px; /* Added min-height */
+    width: 500px;
+    min-height: 300px;
     background: var(--terminal-bg);
     border: 2px solid var(--matrix-green);
     padding: 15px;
@@ -293,19 +293,46 @@
     box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
   }
   
-  .visualizer {
-    height: 50px; /* Reduce from 100px to 50px */
-    margin-top: 10px;
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
+  .track-info {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid var(--matrix-green);
+    border-radius: 3px;
+    background: rgba(0, 255, 65, 0.05);
   }
   
-  .visualizer-bar {
-    flex: 1;
-    background: var(--matrix-green);
-    transition: height 0.1s ease;
-    max-height: 40px; /* Add this line to limit height */
+  .track-info p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  
+  /* Add this CSS rule to hide all timeline elements */
+  .timeline-container,
+  .time-display,
+  .timeline-slider,
+  .timeline-slider::-webkit-slider-thumb,
+  .timeline-slider::-moz-range-thumb {
+    display: none;
+  }
+  
+  .mp3-credit {
+    position: fixed;
+    top: 20px;
+    left: -400px; /* Start off-screen to the left */
+    background: var(--terminal-bg);
+    border: 2px solid var(--matrix-green);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    z-index: 1001;
+    opacity: 0;
+    text-align: center;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .mp3-credit.active {
+    left: 20px;
+    opacity: 1;
   }
   </style></head><body>
   <div class="cursor"></div>
@@ -370,18 +397,24 @@
       </div>
     </div>
     <div class="playlist">
-      <div class="playlist-item active" data-src='/Matrix Soundtrack - Sol's RNG.mp3'>Matrix Soundtrack - Sol's RNG</div>
-      <div class="playlist-item" data-src='/dj quads - its near.mp3'>DJ Quads - It's Near</div>
-      <div class="playlist-item" data-src='/Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3'>Vani - The Blood Cleric</div>
+      <div class="playlist-item active" data-src="Matrix Soundtrack - Sol's RNG.mp3">Arcology on Permafrost</div>
+      <div class="playlist-item" data-src="dj quads - its near.mp3">It's Near</div>
+      <div class="playlist-item" data-src="Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3">Vani - The Blood Cleric</div>
     </div>
     <div class="player-controls">
       <button class="control-button prev-btn">⏮</button>
       <button class="control-button play-btn">▶</button>
       <button class="control-button next-btn">⏭</button>
     </div>
-    <div class="visualizer">
-      <!-- Bars will be added dynamically -->
+    <div class="track-info">
+      <p class="track-author">Author: </p>
+      <p class="track-duration">Duration: </p>
+      <p class="track-creation">Creation Date: </p>
     </div>
+  </div>
+  
+  <div class="mp3-credit">
+    <p class="typewriter">Thanks to <b>Angel</b> for suggesting MP3s.</p>
   </div>
   
   <script>
@@ -422,12 +455,23 @@
   
   class MusicPlayer {
       constructor() {
+          // Add currentTrack initialization at the beginning
+          this.currentTrack = 0;
+          this.isPlaying = false;
+  
           this.player = document.querySelector('.music-player');
           this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
           this.analyser = this.audioContext.createAnalyser();
           this.audio = new Audio();
           this.audio.crossOrigin = "anonymous";
           
+          // Move fullPaths into the class scope as a property
+          this.fullPaths = {
+              'Matrix Soundtrack - Sol\'s RNG.mp3': new URL('Matrix Soundtrack - Sol\'s RNG.mp3', window.location.href).href,
+              'dj quads - its near.mp3': new URL('dj quads - its near.mp3', window.location.href).href,
+              'Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3': new URL('Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3', window.location.href).href
+          };
+  
           this.source = this.audioContext.createMediaElementSource(this.audio);
           this.source.connect(this.analyser);
           this.analyser.connect(this.audioContext.destination);
@@ -439,91 +483,71 @@
           this.playBtn = document.querySelector('.play-btn');
           this.prevBtn = document.querySelector('.prev-btn');
           this.nextBtn = document.querySelector('.next-btn');
-          this.visualizer = document.querySelector('.visualizer');
           
-          this.currentTrack = 0;
-          this.isPlaying = false;
+          // Updated trackInfo object in the MusicPlayer class constructor
+          this.trackInfo = {
+              'It\'s Near': {
+                  author: 'DJ Quads',
+                  duration: '5:31',
+                  created: '2017'
+              },
+              'Arcology on Permafrost': {
+                  author: 'Camellia',
+                  duration: '4:36',
+                  created: '2018'
+              },
+              'Vani - The Blood Cleric': {
+                  author: 'Dutonic',
+                  duration: '4:14',
+                  created: '2023'
+              }
+          };
+  
+          this.authorDisplay = document.querySelector('.track-author');
+          this.durationDisplay = document.querySelector('.track-duration');
+          this.creationDisplay = document.querySelector('.track-creation');
           
-          this.setupVisualizer();
           this.setupEventListeners();
           
-          // Show player after login sequence
           setTimeout(() => {
               this.player.classList.add('active');
-          }, 5000); // Adjust timing as needed
+              this.updateTrackInfo(this.playlist[0].textContent);
+              
+              // Show the credit popup after 2 seconds
+              setTimeout(() => {
+                  const creditPopup = document.querySelector('.mp3-credit');
+                  creditPopup.classList.add('active');
+                  
+                  // Remove the popup after 5 seconds
+                  setTimeout(() => {
+                      creditPopup.style.left = '-400px';
+                      creditPopup.style.opacity = '0';
+                      setTimeout(() => {
+                          creditPopup.remove();
+                      }, 800);
+                  }, 5000);
+              }, 2000); // Wait 2 seconds after player shows
+          }, 5000);
   
-          // Add error handling for audio
           this.audio.addEventListener('error', (e) => {
               console.error('Audio Error:', e);
               console.log('Audio src that failed:', this.audio.src);
           });
       }
-      
-      setupVisualizer() {
-          // Create visualizer bars
-          for (let i = 0; i < 32; i++) {
-              const bar = document.createElement('div');
-              bar.className = 'visualizer-bar';
-              bar.style.height = '2px';
-              this.visualizer.appendChild(bar);
+  
+      updateTrackInfo(trackName) {
+          const info = this.trackInfo[trackName];
+          if (info) {
+              this.authorDisplay.textContent = `Author: ${info.author}`;
+              this.durationDisplay.textContent = `Duration: ${info.duration}`;
+              this.creationDisplay.textContent = `Creation Date: ${info.created}`;
           }
       }
-      
-      setupEventListeners() {
-          this.playBtn.addEventListener('click', () => this.togglePlay());
-          this.prevBtn.addEventListener('click', () => this.playPrev());
-          this.nextBtn.addEventListener('click', () => this.playNext());
-          
-          this.playlist.forEach((item, index) => {
-              item.addEventListener('click', () => {
-                  this.currentTrack = index;
-                  this.loadAndPlay();
-              });
-          });
-          
-          this.audio.addEventListener('ended', () => this.playNext());
-      }
   
-      updateVisualizer = () => {
-          if (!this.isPlaying) {
-              // Reset visualizer bars when not playing
-              const bars = this.visualizer.querySelectorAll('.visualizer-bar');
-              bars.forEach(bar => bar.style.height = '2px');
-              return;
-          }
-  
-          requestAnimationFrame(this.updateVisualizer);
-          
-          this.analyser.getByteFrequencyData(this.dataArray);
-          const bars = this.visualizer.querySelectorAll('.visualizer-bar');
-          
-          for (let i = 0; i < bars.length; i++) {
-              const value = this.dataArray[i] || 0;
-              const height = (value / 255) * 40; // Max height of 40px as defined in CSS
-              bars[i].style.height = height + 'px';
-          }
-      };
-  
-      togglePlay() {
-          if (this.audioContext.state === 'suspended') {
-              this.audioContext.resume();
-          }
-          
-          if (!this.isPlaying) {
-              this.loadAndPlay();
-          } else {
-              this.audio.pause();
-              this.isPlaying = false;
-              this.playBtn.textContent = '▶';
-              // Reset visualizer when paused
-              const bars = this.visualizer.querySelectorAll('.visualizer-bar');
-              bars.forEach(bar => bar.style.height = '2px');
-          }
-      }
-      
       loadAndPlay() {
           const track = this.playlist[this.currentTrack];
-          const audioPath = track.dataset.src;
+          const audioFileName = track.dataset.src;
+          const audioPath = this.fullPaths[audioFileName];
           
           console.log('Attempting to play:', audioPath);
           
@@ -535,30 +559,55 @@
                   this.isPlaying = true;
                   this.playBtn.textContent = '⏸';
                   
-                  // Update active track
                   this.playlist.forEach(item => item.classList.remove('active'));
                   track.classList.add('active');
                   
-                  // Start visualizer
-                  this.updateVisualizer();
+                  // Update track info when new track loads
+                  this.updateTrackInfo(track.textContent);
               })
               .catch(error => {
                   console.error("Playback failed:", error);
                   this.isPlaying = false;
                   this.playBtn.textContent = '▶';
-                  
-                  if (this.audio.error) {
-                      console.error('Audio error code:', this.audio.error.code);
-                      console.error('Audio error message:', this.audio.error.message);
-                  }
               });
       }
-      
-      // Add method to preload audio files
-      preloadAudios() {
-          this.playlist.forEach(item => {
-              const audio = new Audio();
-              audio.src = item.dataset.src;
+  
+      setupEventListeners() {
+          // Play/Pause button
+          this.playBtn.addEventListener('click', () => {
+              if (this.isPlaying) {
+                  this.audio.pause();
+                  this.isPlaying = false;
+                  this.playBtn.textContent = '▶';
+              } else {
+                  this.loadAndPlay();
+              }
+          });
+  
+          // Previous button
+          this.prevBtn.addEventListener('click', () => {
+              this.currentTrack = (this.currentTrack - 1 + this.playlist.length) % this.playlist.length;
+              this.loadAndPlay();
+          });
+  
+          // Next button
+          this.nextBtn.addEventListener('click', () => {
+              this.currentTrack = (this.currentTrack + 1) % this.playlist.length;
+              this.loadAndPlay();
+          });
+  
+          // Playlist item click
+          this.playlist.forEach((item, index) => {
+              item.addEventListener('click', () => {
+                  this.currentTrack = index;
+                  this.loadAndPlay();
+              });
+          });
+  
+          // Auto-play next track when current one ends
+          this.audio.addEventListener('ended', () => {
+              this.currentTrack = (this.currentTrack + 1) % this.playlist.length;
+              this.loadAndPlay();
           });
       }
   }
@@ -566,7 +615,6 @@
   // Modify the initialization code
   document.addEventListener('DOMContentLoaded', () => {
       const player = new MusicPlayer();
-      player.preloadAudios(); // Preload the audio files
       
       // Wait for first user interaction before enabling audio
       document.addEventListener('click', () => {
@@ -662,7 +710,7 @@
                       loginStatus.classList.add('fade-out');
                       setTimeout(() => {
                           loginStatus.remove();
-                      }, 800); // Match transition duration
+                      }, 800);
                   }, 2000);
   
               }, 500);
@@ -790,7 +838,7 @@
   
       if (e.target === terminal || e.target.parentNode === terminal) {
           isDragging = true;
-          cursor.classList.add('dragging'); // Add dragging class
+          cursor.classList.add('dragging');
       }
   }
   
@@ -815,7 +863,7 @@
       initialX = currentX;
       initialY = currentY;
       isDragging = false;
-      cursor.classList.remove('dragging'); // Remove dragging class
+      cursor.classList.remove('dragging');
   }
   
   const musicPlayer = document.querySelector('.music-player');
@@ -847,7 +895,6 @@
         
         element.style.transform = `translate(${currentX}px, ${currentY}px)`;
         
-        // Update cursor position without transition
         cursor.style.transition = 'none';
         cursor.style.left = e.clientX + 'px';
         cursor.style.top = e.clientY + 'px';
@@ -856,7 +903,7 @@
       function dragEnd() {
         document.removeEventListener('mousemove', dragMove);
         document.removeEventListener('mouseup', dragEnd);
-        cursor.style.transition = 'all 0.1s ease'; // Restore cursor transition
+        cursor.style.transition = 'all 0.1s ease';
       }
       
       document.addEventListener('mousemove', dragMove);
