@@ -1,4 +1,4 @@
-<html><head><base href="https://qrexxed.me" /><title>qrexxed</title><style>
+<html><head><base href="https://qrexxed.me"/><title>qrexxed</title><style>
   :root {
     --matrix-green: #00ff41;
     --terminal-bg: rgba(0, 0, 0, 0.9);
@@ -370,9 +370,9 @@
       </div>
     </div>
     <div class="playlist">
-      <div class="playlist-item active" data-src="/dj quads - its near.mp3">DJ Quads - It's Near</div>
-      <div class="playlist-item" data-src="/Matrix Soundtrack - Sol's RNG.mp3">Matrix Soundtrack - Sol's RNG</div>
-      <div class="playlist-item" data-src="/Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3">Vani - The Blood Cleric</div>
+      <div class="playlist-item active" data-src='/Matrix Soundtrack - Sol's RNG.mp3'>Matrix Soundtrack - Sol's RNG</div>
+      <div class="playlist-item" data-src='/dj quads - its near.mp3'>DJ Quads - It's Near</div>
+      <div class="playlist-item" data-src='/Vani, The Blood Cleric  Bloodborne-inspired Boss Music.mp3'>Vani - The Blood Cleric</div>
     </div>
     <div class="player-controls">
       <button class="control-button prev-btn">⏮</button>
@@ -451,6 +451,12 @@
           setTimeout(() => {
               this.player.classList.add('active');
           }, 5000); // Adjust timing as needed
+  
+          // Add error handling for audio
+          this.audio.addEventListener('error', (e) => {
+              console.error('Audio Error:', e);
+              console.log('Audio src that failed:', this.audio.src);
+          });
       }
       
       setupVisualizer() {
@@ -477,7 +483,27 @@
           
           this.audio.addEventListener('ended', () => this.playNext());
       }
-      
+  
+      updateVisualizer = () => {
+          if (!this.isPlaying) {
+              // Reset visualizer bars when not playing
+              const bars = this.visualizer.querySelectorAll('.visualizer-bar');
+              bars.forEach(bar => bar.style.height = '2px');
+              return;
+          }
+  
+          requestAnimationFrame(this.updateVisualizer);
+          
+          this.analyser.getByteFrequencyData(this.dataArray);
+          const bars = this.visualizer.querySelectorAll('.visualizer-bar');
+          
+          for (let i = 0; i < bars.length; i++) {
+              const value = this.dataArray[i] || 0;
+              const height = (value / 255) * 40; // Max height of 40px as defined in CSS
+              bars[i].style.height = height + 'px';
+          }
+      };
+  
       togglePlay() {
           if (this.audioContext.state === 'suspended') {
               this.audioContext.resume();
@@ -489,52 +515,66 @@
               this.audio.pause();
               this.isPlaying = false;
               this.playBtn.textContent = '▶';
+              // Reset visualizer when paused
+              const bars = this.visualizer.querySelectorAll('.visualizer-bar');
+              bars.forEach(bar => bar.style.height = '2px');
           }
       }
       
       loadAndPlay() {
           const track = this.playlist[this.currentTrack];
-          this.audio.src = track.dataset.src;
+          const audioPath = track.dataset.src;
           
-          // Handle the play promise properly
+          console.log('Attempting to play:', audioPath);
+          
+          this.audio.src = audioPath;
+          
           this.audio.play()
               .then(() => {
+                  console.log('Playback started successfully');
                   this.isPlaying = true;
                   this.playBtn.textContent = '⏸';
                   
                   // Update active track
                   this.playlist.forEach(item => item.classList.remove('active'));
                   track.classList.add('active');
+                  
+                  // Start visualizer
+                  this.updateVisualizer();
               })
               .catch(error => {
-                  console.log("Playback failed:", error);
+                  console.error("Playback failed:", error);
                   this.isPlaying = false;
                   this.playBtn.textContent = '▶';
+                  
+                  if (this.audio.error) {
+                      console.error('Audio error code:', this.audio.error.code);
+                      console.error('Audio error message:', this.audio.error.message);
+                  }
               });
       }
       
-      playNext() {
-          this.currentTrack = (this.currentTrack + 1) % this.playlist.length;
-          this.loadAndPlay();
-      }
-      
-      playPrev() {
-          this.currentTrack = (this.currentTrack - 1 + this.playlist.length) % this.playlist.length;
-          this.loadAndPlay();
-      }
-      
-      updateVisualizer() {
-          this.analyser.getByteFrequencyData(this.dataArray);
-          const bars = this.visualizer.children;
-          
-          for (let i = 0; i < bars.length; i++) {
-              const height = (this.dataArray[i] * 0.3); // Reduce from 0.7 to 0.3
-              bars[i].style.height = `${height}px`;
-          }
-          
-          requestAnimationFrame(() => this.updateVisualizer());
+      // Add method to preload audio files
+      preloadAudios() {
+          this.playlist.forEach(item => {
+              const audio = new Audio();
+              audio.src = item.dataset.src;
+          });
       }
   }
+  
+  // Modify the initialization code
+  document.addEventListener('DOMContentLoaded', () => {
+      const player = new MusicPlayer();
+      player.preloadAudios(); // Preload the audio files
+      
+      // Wait for first user interaction before enabling audio
+      document.addEventListener('click', () => {
+          if (player.audioContext.state === 'suspended') {
+              player.audioContext.resume();
+          }
+      }, { once: true });
+  });
   
   // Add a clock update function
   function updateClock() {
@@ -549,19 +589,6 @@
   // Update the clock every second
   setInterval(updateClock, 1000);
   updateClock(); // Initial update
-  
-  // Modify the initialization to remove volume control
-  document.addEventListener('DOMContentLoaded', () => {
-      const player = new MusicPlayer();  
-      player.updateVisualizer();
-      
-      // Wait for first user interaction before enabling audio
-      document.addEventListener('click', () => {
-          if (player.audioContext.state === 'suspended') {
-              player.audioContext.resume();
-          }
-      }, { once: true });
-  });
   
   // Initialize draggable windows - only for terminal
   document.addEventListener('DOMContentLoaded', () => {
